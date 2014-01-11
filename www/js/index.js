@@ -16,6 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+var medias = [];
+var is_running = true;
+function playAudio(filename, colIdx) {
+    var path = '/android_asset/www/sounds/' + filename + '.ogg';
+    console.log("play sound " + path);
+    var onSuccess = function() {};
+    var onError = function(error) {
+      console.error('Error ' + error.code + ': ' + error.message);
+    };
+    // Play the audio file at url
+    if(!medias[filename + '_' + colIdx]) {
+      medias[filename + '_' + colIdx] = new Media(path, onSuccess, onError);
+    }
+    // Play audio
+    medias[filename + '_' + colIdx].play();
+    setTimeout(function() {
+      medias[filename + '_' + colIdx].stop();
+    }, 1000);
+}
 var app = {
     // Application Constructor
     initialize: function() {
@@ -27,6 +46,8 @@ var app = {
     // 'load', 'deviceready', 'offline', and 'online'.
     bindEvents: function() {
         document.addEventListener('deviceready', this.onDeviceReady, false);
+        document.addEventListener('pause', this.onPause, false);
+        document.addEventListener('resume', this.onResume, false);
     },
     // deviceready Event Handler
     //
@@ -35,15 +56,18 @@ var app = {
     onDeviceReady: function() {
         app.receivedEvent('deviceready');
     },
+    onPause: function() {
+        app.receivedEvent('pause');
+    },
+    onResume: function() {
+        app.receivedEvent('resume');
+    },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
-
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
-
         console.log('Received Event: ' + id);
+        switch(id) {
+          case 'pause': is_running = false; break;
+          case 'resume': is_running = true; break;
+        }
     }
 };
